@@ -1,4 +1,4 @@
-# kennel:generated sha256=a1d0ca2bb4beb256c2a614e6579ed371086f0da700a91d332c61305d1d12d4b0
+# kennel:generated sha256=f16f6853d2191c7e79698b8a23505a7f5e5d0bf63b909e696e616b843ebee85b
 # Agent image for python-flask.
 # Built on the HOST network (not sandboxed). At run time the container is attached only to the
 # internal `sandbox` network, so it reaches the internet only through the gateway.
@@ -55,9 +55,10 @@ RUN set -eux; \
     useradd --uid "${UID}" --gid "${GID}" --create-home --shell /bin/bash dev; \
     git config --system --add safe.directory /workspace
 
-# The workspace and every cache directory must exist in the image and be owned by the user: Docker
-# copies that ownership into a fresh named volume, which is otherwise root-owned and unwritable.
-RUN install -d -o "${UID}" -g "${GID}" /workspace '/workspace/.mypy_cache' '/workspace/.pytest_cache' '/workspace/.ruff_cache' '/workspace/.venv' \
+# The workspace, every cache directory and the parents of nested ones must exist in the image and be
+# owned by the user: Docker copies that ownership into a fresh named volume, which is otherwise
+# root-owned and unwritable.
+RUN install -d -o "${UID}" -g "${GID}" '/workspace' '/workspace/.mypy_cache' '/workspace/.pytest_cache' '/workspace/.ruff_cache' '/workspace/.venv' \
  && install -d -o "${UID}" -g "${GID}" /home/dev/.cache
 
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/kennel-entrypoint

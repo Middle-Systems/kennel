@@ -46,3 +46,12 @@ func TestInspectDetectsEditsAndForeignFiles(t *testing.T) {
 		t.Error("CRLF-converted content is not byte-identical")
 	}
 }
+
+func TestWorkspaceDirsIncludesParentsOfNestedCaches(t *testing.T) {
+	d := &Data{Caches: cacheVolumes([]string{"app/build", "app/node_modules", "node_modules", "a/b/c"})}
+	got := strings.Join(d.WorkspaceDirs(), " ")
+	want := "/workspace /workspace/app /workspace/app/build /workspace/app/node_modules /workspace/node_modules /workspace/a /workspace/a/b /workspace/a/b/c"
+	if got != want {
+		t.Errorf("WorkspaceDirs() = %q\nwant %q", got, want)
+	}
+}

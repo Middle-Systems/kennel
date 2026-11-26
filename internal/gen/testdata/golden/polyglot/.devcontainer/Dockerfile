@@ -1,4 +1,4 @@
-# kennel:generated sha256=c252343ab0d364b6fd961517b303003734306cece78336248649e3cb7c92a205
+# kennel:generated sha256=8d1c05245d6100e25ea0b37afc1fa491f2bcc5b3c3d6840263d0a48988629afe
 # Agent image for polyglot.
 # Built on the HOST network (not sandboxed). At run time the container is attached only to the
 # internal `sandbox` network, so it reaches the internet only through the gateway.
@@ -65,9 +65,10 @@ RUN set -eux; \
     useradd --uid "${UID}" --gid "${GID}" --create-home --shell /bin/bash dev; \
     git config --system --add safe.directory /workspace
 
-# The workspace and every cache directory must exist in the image and be owned by the user: Docker
-# copies that ownership into a fresh named volume, which is otherwise root-owned and unwritable.
-RUN install -d -o "${UID}" -g "${GID}" /workspace '/workspace/api/.mypy_cache' '/workspace/api/.pytest_cache' '/workspace/api/.ruff_cache' '/workspace/api/.venv' '/workspace/web/node_modules' \
+# The workspace, every cache directory and the parents of nested ones must exist in the image and be
+# owned by the user: Docker copies that ownership into a fresh named volume, which is otherwise
+# root-owned and unwritable.
+RUN install -d -o "${UID}" -g "${GID}" '/workspace' '/workspace/api' '/workspace/api/.mypy_cache' '/workspace/api/.pytest_cache' '/workspace/api/.ruff_cache' '/workspace/api/.venv' '/workspace/web' '/workspace/web/node_modules' \
  && install -d -o "${UID}" -g "${GID}" /home/dev/.cache
 
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/kennel-entrypoint

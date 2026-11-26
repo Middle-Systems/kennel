@@ -1,4 +1,4 @@
-# kennel:generated sha256=279160bec616bf9151d3af3ecc5eed596e4b5d737dafa9b428d64e9d6d10d8c1
+# kennel:generated sha256=7ccc47c97fb53dd1bc9f575c1d08e23aff11cf43ef317c7692542e92cad72e2a
 # Agent image for php-laravel.
 # Built on the HOST network (not sandboxed). At run time the container is attached only to the
 # internal `sandbox` network, so it reaches the internet only through the gateway.
@@ -56,9 +56,10 @@ RUN set -eux; \
     useradd --uid "${UID}" --gid "${GID}" --create-home --shell /bin/bash dev; \
     git config --system --add safe.directory /workspace
 
-# The workspace and every cache directory must exist in the image and be owned by the user: Docker
-# copies that ownership into a fresh named volume, which is otherwise root-owned and unwritable.
-RUN install -d -o "${UID}" -g "${GID}" /workspace '/workspace/vendor' \
+# The workspace, every cache directory and the parents of nested ones must exist in the image and be
+# owned by the user: Docker copies that ownership into a fresh named volume, which is otherwise
+# root-owned and unwritable.
+RUN install -d -o "${UID}" -g "${GID}" '/workspace' '/workspace/vendor' \
  && install -d -o "${UID}" -g "${GID}" /home/dev/.cache
 
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/kennel-entrypoint

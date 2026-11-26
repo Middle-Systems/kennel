@@ -153,6 +153,26 @@ func canonicalStacks(items []string) []string {
 	return out
 }
 
+// WorkspaceDirs lists /workspace and every directory the image must pre-create under it, parents
+// first: each cache mount point and each of its ancestors. `install -d -o` only chowns the last
+// path component, so a nested cache such as "app/build" would otherwise leave "app" root-owned in
+// the image, and from there in the workspace volume, where the agent could not create files in it.
+func (d *Data) WorkspaceDirs() []string {
+	seen := map[string]bool{"/workspace": true}
+	dirs := []string{"/workspace"}
+	for _, c := range d.Caches {
+		parts := strings.Split(c.Path, "/")
+		for i := range parts {
+			dir := "/workspace/" + strings.Join(parts[:i+1], "/")
+			if !seen[dir] {
+				seen[dir] = true
+				dirs = append(dirs, dir)
+			}
+		}
+	}
+	return dirs
+}
+
 // cacheVolumes names a volume per directory, deterministically and without collisions.
 func cacheVolumes(dirs []string) []CacheVolume {
 	var out []CacheVolume

@@ -1,4 +1,4 @@
-# kennel:generated sha256=2024deeb3c868abce844e6230e2c0004e32ac2a1af19e40cfcc5cb4b9e67846c
+# kennel:generated sha256=59d06595a74fe3a6a618f87e39b2b1c038cf5123d3c464fe14f754acb093c504
 # Agent image for node-vite.
 # Built on the HOST network (not sandboxed). At run time the container is attached only to the
 # internal `sandbox` network, so it reaches the internet only through the gateway.
@@ -55,9 +55,10 @@ RUN set -eux; \
     useradd --uid "${UID}" --gid "${GID}" --create-home --shell /bin/bash dev; \
     git config --system --add safe.directory /workspace
 
-# The workspace and every cache directory must exist in the image and be owned by the user: Docker
-# copies that ownership into a fresh named volume, which is otherwise root-owned and unwritable.
-RUN install -d -o "${UID}" -g "${GID}" /workspace '/workspace/node_modules' \
+# The workspace, every cache directory and the parents of nested ones must exist in the image and be
+# owned by the user: Docker copies that ownership into a fresh named volume, which is otherwise
+# root-owned and unwritable.
+RUN install -d -o "${UID}" -g "${GID}" '/workspace' '/workspace/node_modules' \
  && install -d -o "${UID}" -g "${GID}" /home/dev/.cache
 
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/kennel-entrypoint

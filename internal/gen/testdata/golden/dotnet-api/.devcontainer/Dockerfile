@@ -1,4 +1,4 @@
-# kennel:generated sha256=6051bb14a794e39903b75334f77863d2d5d9a785011eedf41fac0e2bb8f76676
+# kennel:generated sha256=1a4c6ac011f6b311fba6d7d95f51000ef5b513827fa54db68344a33b2708578e
 # Agent image for dotnet-api.
 # Built on the HOST network (not sandboxed). At run time the container is attached only to the
 # internal `sandbox` network, so it reaches the internet only through the gateway.
@@ -60,9 +60,10 @@ RUN set -eux; \
     useradd --uid "${UID}" --gid "${GID}" --create-home --shell /bin/bash dev; \
     git config --system --add safe.directory /workspace
 
-# The workspace and every cache directory must exist in the image and be owned by the user: Docker
-# copies that ownership into a fresh named volume, which is otherwise root-owned and unwritable.
-RUN install -d -o "${UID}" -g "${GID}" /workspace '/workspace/bin' '/workspace/obj' \
+# The workspace, every cache directory and the parents of nested ones must exist in the image and be
+# owned by the user: Docker copies that ownership into a fresh named volume, which is otherwise
+# root-owned and unwritable.
+RUN install -d -o "${UID}" -g "${GID}" '/workspace' '/workspace/bin' '/workspace/obj' \
  && install -d -o "${UID}" -g "${GID}" /home/dev/.cache
 
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/kennel-entrypoint
